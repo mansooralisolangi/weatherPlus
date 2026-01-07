@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeatherPlus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="style.css">
+
+
+</head>
+
+<body>
+  <div class="weather-card">
+    <div class="weather-header">
+      <h1 class="app-title">WeatherPlus</h1>
+      <p class="app-subtitle">Real-time weather information</p>
+    </div>
+
+    <div class="search-section">
+      <form onsubmit="weather_app(event)" class="search-form">
+        <input type="text" id="city" placeholder="Enter city name" required>
+        <button type="submit">
+          <i class="fas fa-search"></i>
+        </button>
+      </form>
+    </div>
+
+    <div class="weather-content">
+      <div class="location-section">
+        <div class="location-main">
+          <h2 class="city-name" id="city_name"></h2>
+          <span class="country-code" id="country_name"></span>
+        </div>
+        <div class="current-date-time" id="datetime">
+          
+        </div>
+      </div>
+
+      <div class="weather-display">
+        <div class="weather-icon-section">
+          <i class="fas fa-sun weather-icon"></i>
+          <div class="weather-description" id="sunny"></div>
+        </div>
+        <div class="temperature-section">
+          <div class="temperature" id="temp"></div>
+          <div class="temperature-label">Temperature</div>
+        </div>
+      </div>
+
+      <div class="weather-details">
+        <div class="detail-card">
+          <div class="detail-icon">
+            <i class="fas fa-sunrise"></i>
+          </div>
+          <div class="detail-content">
+            <div class="detail-label">Sunrise</div>
+            <div class="detail-value" id="sunrise"></div>
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <div class="detail-icon">
+            <i class="fas fa-sunset"></i>
+          </div>
+          <div class="detail-content">
+            <div class="detail-label">Sunset</div>
+            <div class="detail-value" id="sunset"></div>
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <div class="detail-icon">
+            <i class="fas fa-tint"></i>
+          </div>
+          <div class="detail-content">
+            <div class="detail-label">Humidity</div>
+            <div class="detail-value" id="humidity"></div>
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <div class="detail-icon">
+            <i class="fas fa-wind"></i>
+          </div>
+          <div class="detail-content">
+            <div class="detail-label">Wind Speed</div>
+            <div class="detail-value" id="wind_speed"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timezone-section" id="timezone">
+        <div class="timezone-label"></div>
+        <div class="timezone-value"></div>
+        <div class="timezone-date"></div>
+      </div>
+    </div>
+
+    <div class="weather-footer">
+      <p>real-time weather INFO</p>
+    </div>
+  </div>
+
+  <script src="main.mjs"></script>
+</body>
+</html>
