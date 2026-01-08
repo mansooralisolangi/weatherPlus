@@ -1,6 +1,5 @@
 
-
-//    async function weather_app(event) {
+//     async function weather_app(event) {
 //         event.preventDefault();
 //          let city = document.getElementById("city").value.trim();
    
@@ -23,8 +22,6 @@
 
 
 
-
-
 async function getWeatherByLocation(lat, lon) {
     const api_key = "a516986ff28271fa99675b3562f8578b";
 
@@ -34,7 +31,6 @@ async function getWeatherByLocation(lat, lon) {
         );
 
         document.getElementById("city").value = response.data.city.name;
-
         renderWeather(response.data);
 
     } catch (error) {
@@ -44,15 +40,16 @@ async function getWeatherByLocation(lat, lon) {
 }
 
 
-
-// RENDER WEATHER DATA
-
 function renderWeather(data) {
-
     document.getElementById("city_name").innerText = data.city.name;
     document.getElementById("country_name").innerText = data.city.country;
 
     const timezoneOffsetSec = data.city.timezone;
+    const timezoneOffsetHours = timezoneOffsetSec / 3600;
+    
+    const gmtOffset = timezoneOffsetHours >= 0 ? 
+        `GMT+${timezoneOffsetHours}` : 
+        `GMT${timezoneOffsetHours}`;
 
     function formatTime12h(date) {
         let hours = date.getUTCHours();
@@ -60,6 +57,12 @@ function renderWeather(data) {
         const ampm = hours >= 12 ? 'PM' : 'AM';
         hours = hours % 12 || 12;
         return `${hours}:${minutes} ${ampm}`;
+    }
+
+    function formatTime24h(date) {
+        let hours = date.getUTCHours();
+        const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
     }
 
     function formatDate(date) {
@@ -72,11 +75,23 @@ function renderWeather(data) {
     }
 
     const nowUTC = new Date();
-    const cityTime = new Date(nowUTC.getTime() + timezoneOffsetSec * 1000);
+    
+   const cityTime = new Date(nowUTC.getTime() + timezoneOffsetSec * 1000);
 
-    document.getElementById("timezone").innerHTML = `
-        <div>${formatTime12h(cityTime)}</div>
-        <div>${formatDate(cityTime)}</div>
+   document.getElementById("timezone").innerHTML = `
+        <div style="margin-bottom: 5px;">
+            <strong>Local Time:</strong> ${formatTime12h(cityTime)} (${formatTime24h(cityTime)})
+        </div>
+        <div style="margin-bottom: 5px;">
+            <strong>GMT/UTC:</strong> ${formatTime12h(nowUTC)} (${formatTime24h(nowUTC)})
+        </div>
+        <div>
+            <strong>${formatDate(cityTime)}</strong>
+        </div>
+        <div style="margin-top: 5px; font-size: 0.9em; color: #666;">
+            Timezone: ${gmtOffset} (${timezoneOffsetHours > 0 ? `${timezoneOffsetHours} hours ahead of GMT` : 
+            timezoneOffsetHours < 0 ? `${Math.abs(timezoneOffsetHours)} hours behind GMT` : 'Same as GMT'})
+        </div>
     `;
 
     function formatLocalTime(unix, offset) {
@@ -84,28 +99,65 @@ function renderWeather(data) {
         return formatTime12h(d);
     }
 
-    document.getElementById("sunrise").innerText =
-        formatLocalTime(data.city.sunrise, timezoneOffsetSec);
 
-    document.getElementById("sunset").innerText =
-        formatLocalTime(data.city.sunset, timezoneOffsetSec);
-
-    document.getElementById("humidity").innerText =
-        `: ${data.list[0].main.humidity} %`;
-
-    document.getElementById("wind_speed").innerText =
-        `${(data.list[0].wind.speed * 3.6).toFixed(1)} km/h`;
-
-    document.getElementById("sunny").innerText =
-        data.list[0].weather[0].description;
-
-    document.getElementById("temp").innerText =
-        `${data.list[0].main.temp.toFixed(1)} °C`;
+    document.getElementById("sunrise").innerText = formatLocalTime(data.city.sunrise, timezoneOffsetSec);
+    document.getElementById("sunset").innerText = formatLocalTime(data.city.sunset, timezoneOffsetSec);
+    document.getElementById("humidity").innerText = `${data.list[0].main.humidity} %`;
+    document.getElementById("wind_speed").innerText = `${(data.list[0].wind.speed * 3.6).toFixed(1)} km/h`;
+    document.getElementById("sunny").innerText = data.list[0].weather[0].description;
+    document.getElementById("temp").innerText = `${data.list[0].main.temp.toFixed(1)} °C`;
+    updateTimeComparison(cityTime, nowUTC, gmtOffset, timezoneOffsetHours);
 }
 
-// ==========================
+
+function updateTimeComparison(localTime, utcTime, gmtOffset, offsetHours) {
+    let timeComparisonDiv = document.getElementById("timeComparison");
+    
+    if (!timeComparisonDiv) {
+        timeComparisonDiv = document.createElement("div");
+        timeComparisonDiv.id = "timeComparison";
+        timeComparisonDiv.style.marginTop = "10px";
+        timeComparisonDiv.style.padding = "10px";
+        timeComparisonDiv.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
+        timeComparisonDiv.style.borderRadius = "8px";
+        timeComparisonDiv.style.fontSize = "0.9em";
+        document.getElementById("timezone").parentNode.appendChild(timeComparisonDiv);
+    }
+
+    const diffMs = localTime - utcTime;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    timeComparisonDiv.innerHTML = `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <span>Local Time:</span>
+            <span><strong>${formatTime12h(localTime)}</strong></span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <span>GMT/UTC:</span>
+            <span><strong>${formatTime12h(utcTime)}</strong></span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <span>Difference:</span>
+            <span><strong>${diffHours >= 0 ? '+' : ''}${diffHours}h ${diffMinutes}m</strong></span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span>Timezone:</span>
+            <span><strong>${gmtOffset}</strong></span>
+        </div>
+    `;
+
+    function formatTime12h(date) {
+        let hours = date.getUTCHours();
+        const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        return `${hours}:${minutes} ${ampm}`;
+    }
+}
+
+
 // MANUAL CITY SEARCH
-// ==========================
 async function weather_app(event) {
     event.preventDefault();
 
@@ -121,7 +173,6 @@ async function weather_app(event) {
         const response = await axios.get(
             `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${api_key}&units=metric`
         );
-
         renderWeather(response.data);
 
     } catch (error) {
@@ -129,9 +180,8 @@ async function weather_app(event) {
     }
 }
 
-// ==========================
 // AUTO DETECT USER LOCATION
-// ==========================
+
 window.onload = function () {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -142,7 +192,27 @@ window.onload = function () {
             },
             () => {
                 console.warn("Location permission denied");
+                document.getElementById("city").value = "London";
+                weather_app(new Event('submit'));
             }
         );
+    } else {
+        document.getElementById("city").value = "London";
+        weather_app(new Event('submit'));
     }
 };
+
+
+function formatTime12h(date) {
+    let hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    return `${hours}:${minutes} ${ampm}`;
+}
+
+function formatTime24h(date) {
+    let hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+}
