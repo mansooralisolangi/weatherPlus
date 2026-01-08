@@ -20,8 +20,6 @@
 //         const city_name =document.getElementById("city_name").innerText = ` ${response.data.city.name}`;
 //         document.getElementById("country_name").innerHTML = ` ${response.data.city.country}`;
 
-
-
 async function getWeatherByLocation(lat, lon) {
     const api_key = "a516986ff28271fa99675b3562f8578b";
 
@@ -82,13 +80,11 @@ function renderWeather(data) {
         <div style="margin-bottom: 5px;">
             <strong>Local Time:</strong> ${formatTime12h(cityTime)} (${formatTime24h(cityTime)})
         </div>
-        <div style="margin-bottom: 5px;">
-            <strong>GMT/UTC:</strong> ${formatTime12h(nowUTC)} (${formatTime24h(nowUTC)})
-        </div>
+        
         <div>
             <strong>${formatDate(cityTime)}</strong>
         </div>
-        <div style="margin-top: 5px; font-size: 0.9em; color: #666;">
+        <div style="margin-bottom: 5px;">
             Timezone: ${gmtOffset} (${timezoneOffsetHours > 0 ? `${timezoneOffsetHours} hours ahead of GMT` : 
             timezoneOffsetHours < 0 ? `${Math.abs(timezoneOffsetHours)} hours behind GMT` : 'Same as GMT'})
         </div>
@@ -112,40 +108,11 @@ function renderWeather(data) {
 
 function updateTimeComparison(localTime, utcTime, gmtOffset, offsetHours) {
     let timeComparisonDiv = document.getElementById("timeComparison");
-    
-    if (!timeComparisonDiv) {
-        timeComparisonDiv = document.createElement("div");
-        timeComparisonDiv.id = "timeComparison";
-        timeComparisonDiv.style.marginTop = "10px";
-        timeComparisonDiv.style.padding = "10px";
-        timeComparisonDiv.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
-        timeComparisonDiv.style.borderRadius = "8px";
-        timeComparisonDiv.style.fontSize = "0.9em";
-        document.getElementById("timezone").parentNode.appendChild(timeComparisonDiv);
-    }
 
     const diffMs = localTime - utcTime;
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
     
-    timeComparisonDiv.innerHTML = `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-            <span>Local Time:</span>
-            <span><strong>${formatTime12h(localTime)}</strong></span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-            <span>GMT/UTC:</span>
-            <span><strong>${formatTime12h(utcTime)}</strong></span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-            <span>Difference:</span>
-            <span><strong>${diffHours >= 0 ? '+' : ''}${diffHours}h ${diffMinutes}m</strong></span>
-        </div>
-        <div style="display: flex; justify-content: space-between;">
-            <span>Timezone:</span>
-            <span><strong>${gmtOffset}</strong></span>
-        </div>
-    `;
 
     function formatTime12h(date) {
         let hours = date.getUTCHours();
@@ -156,8 +123,6 @@ function updateTimeComparison(localTime, utcTime, gmtOffset, offsetHours) {
     }
 }
 
-
-// MANUAL CITY SEARCH
 async function weather_app(event) {
     event.preventDefault();
 
